@@ -3,6 +3,7 @@ import type { Node } from 'react';
 import classnames from 'classnames';
 import React, { Fragment, useEffect, useState } from 'react';
 import { withRouter } from 'react-router';
+import * as CS from 'constants/claim_search';
 import { createNormalizedClaimSearchKey, MATURE_TAGS } from 'lbry-redux';
 import { FormField } from 'component/common/form';
 import Button from 'component/button';
@@ -25,6 +26,7 @@ export const TYPE_NEW = 'new';
 
 const SEARCH_TYPES = [TYPE_TRENDING, TYPE_NEW, TYPE_TOP];
 const SEARCH_TIMES = [TIME_DAY, TIME_WEEK, TIME_MONTH, TIME_YEAR, TIME_ALL];
+import DiscoverSearchOptions from 'component/discoverSearchOptions';
 
 type Props = {
   uris: Array<string>,
@@ -87,6 +89,13 @@ function ClaimListDiscover(props: Props) {
   const typeSort = urlParams.get('type') || defaultTypeSort || TYPE_TRENDING;
   const timeSort = urlParams.get('time') || defaultTimeSort || TIME_WEEK;
   const tagsInUrl = urlParams.get('t') || '';
+
+  // // custom params:
+  // const sortParam = urlParams.get('sort') || defaultTypeSort || CS.SORT_TRENDING;
+  // const timeParam = urlParams.get('time') || CS.TIME_WEEK;
+  // const durationParam = urlParams.get('d') || '';
+  // const streamTypeParam = urlParams.get('f') || '';
+  //
   const options: {
     page_size: number,
     page: number,
@@ -98,6 +107,8 @@ function ClaimListDiscover(props: Props) {
     order_by: Array<string>,
     release_time?: string,
     name?: string,
+    duration?: string,
+    stream_type?: string,
     claim_type?: string | Array<string>,
   } = {
     page_size: PAGE_SIZE,
@@ -155,6 +166,20 @@ function ClaimListDiscover(props: Props) {
           .startOf('minute')
           .unix()
       )}`;
+    }
+  }
+
+  if (durationParam) {
+    if (durationParam === CS.DURATION_SHORT) {
+      options.duration = '<=1800';
+    } else if (durationParam === CS.DURATION_LONG) {
+      options.duration = '>=1800';
+    }
+  }
+
+  if (streamTypeParam && CS.FILE_TYPES.includes(streamTypeParam)) {
+    if (streamTypeParam !== CS.FILE_ALL) {
+      options.stream_type = streamTypeParam;
     }
   }
 
@@ -225,6 +250,42 @@ function ClaimListDiscover(props: Props) {
     history.push(`${getSearch()}type=${typeSort}&time=${newTimeSort}`);
   }
 
+  function handleChange(ob) {
+    const url = buildUrl(ob);
+    setPage(1);
+    history.push(url);
+  }
+
+  function buildUrl(ob) {
+    let url = `${getSearch()}`;
+
+    if (personalView) {
+      url += ob.key === 'sort' ? `&sort=${ob.value}` : `&sort=${sortParam}`;
+    } else {
+      url += ob.key === 'sort' ? `sort=${ob.value}` : `sort=${sortParam}`;
+    }
+
+    if (timeParam || ob.key === CS.TIME_KEY) {
+      // || top
+      if (ob.value !== CS.TIME_ALL) {
+        url += ob.key === 'time' ? `&time=${ob.value}` : `&time=${timeParam}`;
+      }
+    }
+    if (ob.key !== CS.CLEAR_KEY) {
+      if (streamTypeParam || ob.key === CS.FILE_KEY) {
+        if (ob.value !== CS.FILE_ALL) {
+          url += ob.key === 'streamType' ? `&f=${ob.value}` : `&f=${streamTypeParam}`;
+        }
+      }
+      if (durationParam || ob.key === CS.DURATION_KEY) {
+        if (ob.value !== CS.DURATION_ALL) {
+          url += ob.key === 'duration' ? `&d=${ob.value}` : `&d=${durationParam}`;
+        }
+      }
+    }
+    return url;
+  }
+
   function handleScrollBottom() {
     if (!loading) {
       setPage(page + 1);
@@ -273,6 +334,12 @@ function ClaimListDiscover(props: Props) {
           ))}
         </FormField>
       )}
+      <DiscoverSearchOptions
+        options={options}
+        sortParam={sortParam}
+        timeParam={timeParam}
+        handleChange={handleChange}
+      />
       {hasMatureTags && hiddenNsfwMessage}
     </Fragment>
   );
