@@ -110,6 +110,7 @@ function ClaimListDiscover(props: Props) {
     duration?: string,
     stream_type?: string,
     claim_type?: string | Array<string>,
+    stream_types?: any,
   } = {
     page_size: PAGE_SIZE,
     page,
@@ -179,7 +180,7 @@ function ClaimListDiscover(props: Props) {
 
   if (streamTypeParam && CS.FILE_TYPES.includes(streamTypeParam)) {
     if (streamTypeParam !== CS.FILE_ALL) {
-      options.stream_type = streamTypeParam;
+      options.stream_types = streamTypeParam;
     }
   }
 
