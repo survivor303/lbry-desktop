@@ -38,6 +38,8 @@ export type AppState = {
   enhancedLayout: boolean,
   searchOptionsExpanded: boolean,
   isPasswordSaved: boolean,
+  welcomeVersion: number,
+  allowAnalytics: boolean,
 };
 
 const defaultState: AppState = {
@@ -69,6 +71,8 @@ const defaultState: AppState = {
   currentScroll: 0,
   scrollHistory: [0],
   isPasswordSaved: false,
+  welcomeVersion: 0.0,
+  allowAnalytics: false,
 };
 
 // @@router comes from react-router
@@ -248,6 +252,16 @@ reducers[ACTIONS.SHOW_MODAL] = (state, action) =>
   Object.assign({}, state, {
     modal: action.data.id,
     modalProps: action.data.modalProps,
+  });
+
+reducers[ACTIONS.SET_WELCOME_VERSION] = (state, action) =>
+  Object.assign({}, state, {
+    welcomeVersion: action.data,
+  });
+
+reducers[ACTIONS.SET_ALLOW_ANALYTICS] = (state, action) =>
+  Object.assign({}, state, {
+    allowAnalytics: action.data,
   });
 
 reducers[ACTIONS.HIDE_MODAL] = state =>

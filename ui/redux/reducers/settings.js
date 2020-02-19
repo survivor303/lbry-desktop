@@ -1,9 +1,7 @@
 import * as ACTIONS from 'constants/action_types';
-import * as SETTINGS from 'constants/settings';
 import moment from 'moment';
 import SUPPORTED_LANGUAGES from 'constants/supported_languages';
-import { ACTIONS as LBRY_REDUX_ACTIONS, SHARED_PREFERENCES } from 'lbry-redux';
-
+import { ACTIONS as LBRY_REDUX_ACTIONS, SHARED_PREFERENCES, SETTINGS } from 'lbry-redux';
 const reducers = {};
 let settingLanguage = [];
 try {
@@ -130,8 +128,8 @@ reducers[ACTIONS.CLIENT_SETTING_CHANGED] = (state, action) => {
 
 reducers[LBRY_REDUX_ACTIONS.USER_STATE_POPULATE] = (state, action) => {
   const { settings: sharedPreferences } = action.data;
+  // todo: populate sharedPreferences that match client settings constants
 
-  // process clientSettings and daemonSettings
   return Object.assign({}, state, { sharedPreferences });
 };
 

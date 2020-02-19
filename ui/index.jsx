@@ -13,7 +13,7 @@ import * as MODALS from 'constants/modal_types';
 import React, { Fragment, useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
-import { doDaemonReady, doAutoUpdate, doOpenModal, doHideModal } from 'redux/actions/app';
+import { doDaemonReady, doAutoUpdate, doOpenModal, doHideModal, doToggle3PAnalytics } from 'redux/actions/app';
 import { Lbry, doToast, isURIValid, setSearchApi, apiCall } from 'lbry-redux';
 import { doSetLanguage, doUpdateIsNightAsync } from 'redux/actions/settings';
 import {
@@ -278,7 +278,15 @@ function AppWrapper() {
   }, []);
 
   useEffect(() => {
+    if (persistDone) {
+      app.store.dispatch(doToggle3PAnalytics());
+    }
+  }, [persistDone]);
+
+  useEffect(() => {
     if (readyToLaunch && persistDone) {
+      analytics.startupEvent();
+
       app.store.dispatch(doUpdateIsNightAsync());
       app.store.dispatch(doDaemonReady());
       app.store.dispatch(doBlackListedOutpointsSubscribe());
