@@ -56,6 +56,7 @@ const appFilter = createFilter('app', [
   'volume',
   'muted',
   'allowAnalytics',
+  'welcomeVersion',
 ]);
 // We only need to persist the receiveAddress for the wallet
 const walletFilter = createFilter('wallet', ['receiveAddress']);
