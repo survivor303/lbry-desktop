@@ -4,9 +4,12 @@ import Button from 'component/button';
 import I18nMessage from 'component/i18nMessage';
 import { FormField } from 'component/common/form-components/form-field';
 import { Form } from 'component/common/form-components/form';
-import * as PAGES from 'constants/pages';
 import { withRouter } from 'react-router-dom';
 import image from 'static/img/unlocklbry.svg';
+
+const FREE = 'free';
+const LIMITED = 'limited';
+const NONE = 'none';
 
 type Props = {
   setWelcomeVersion: () => void,
@@ -21,10 +24,10 @@ function PrivacyAgreement(props: Props) {
   const [agree, setAgree] = useState(false); // preload
 
   function handleSubmit() {
-    if (share === 'free') {
+    if (share === FREE) {
       setShareDataInternal(true);
       setShareDataThirdParty(true);
-    } else if (share === 'limited') {
+    } else if (share === LIMITED) {
       setShareDataInternal(true);
       setShareDataThirdParty(false);
     } else {
@@ -64,98 +67,48 @@ function PrivacyAgreement(props: Props) {
                 {__('Yes, including with third-party analytics platforms')}
               </>
             }
-            helper={
-              <I18nMessage
-                tokens={{
-                  terms: (
-                    <Button
-                      tabIndex="2"
-                      button="link"
-                      href="https://www.lbry.com/termsofservice"
-                      label={__('Terms of Service')}
-                    />
-                  ),
-                }}
-              >
-                Sending information to third parties (e.g. Google Analytics or Mixpanel) allows us to use detailed
-                analytical reports to improve all aspects of LBRY.
-              </I18nMessage>
-            }
-            checked={share === 'free'}
-            onChange={e => setShare('free')}
+            helper={__(`Sending information to third parties (e.g. Google Analytics or Mixpanel) allows us to use detailed
+                analytical reports to improve all aspects of LBRY.`)}
+            checked={share === FREE}
+            onChange={e => setShare(FREE)}
           />
           <FormField
             name={'shareWithLBRY'}
             type="radio"
-            checked={share === 'limited'}
+            checked={share === LIMITED}
             label={
               <>
                 {/*<span className="emoji">🙂</span>*/}
                 {__('Yes, but only with LBRY, Inc.')}
               </>
             }
-            helper={
-              <I18nMessage
-                tokens={{
-                  terms: (
-                    <Button
-                      tabIndex="2"
-                      button="link"
-                      href="https://www.lbry.com/termsofservice"
-                      label={__('Terms of Service')}
-                    />
-                  ),
-                }}
-              >
-                Sharing information with LBRY, Inc. allows us to report to publishers how their content is doing, as
-                well as track basic usage and performance. This is the minimum required to earn rewards from LBRY, Inc.
-              </I18nMessage>
-            }
-            onChange={e => setShare('limited')}
+            helper={__(
+              `Sharing information with LBRY, Inc. allows us to report to publishers how their content is doing, as
+                well as track basic usage and performance. This is the minimum required to earn rewards from LBRY, Inc.`
+            )}
+            onChange={e => setShare(LIMITED)}
           />
           <FormField
             name={'shareNot'}
             type="radio"
-            checked={share === 'none'}
+            checked={share === NONE}
             label={
               <>
                 {/*<span className="emoji">😢</span>*/}
                 {__('No')}
               </>
             }
-            helper={
-              <I18nMessage
-                tokens={{
-                  terms: (
-                    <Button
-                      tabIndex="2"
-                      button="link"
-                      href="https://www.lbry.com/termsofservice"
-                      label={__('Terms of Service')}
-                    />
-                  ),
-                }}
-              >
-                No information will be sent directly to LBRY, Inc. or third-parties about your usage. Note that as
+            helper={__(`No information will be sent directly to LBRY, Inc. or third-parties about your usage. Note that as
                 peer-to-peer software, your IP address and potentially other system information can be sent to other
-                users, though this information is not stored permanently.
-              </I18nMessage>
-            }
-            onChange={e => setShare('none')}
+                users, though this information is not stored permanently.`)}
+            onChange={e => setShare(NONE)}
           />
         </fieldset>
 
         <p className="section__subtitle">
           <I18nMessage
             tokens={{
-              terms: (
-                <Button
-                  tabIndex="2"
-                  button="link"
-                  href="https://www.lbry.com/termsofservice"
-                  label={__('Terms of Service')}
-                />
-              ),
+              terms: <Button button="link" href="https://www.lbry.com/termsofservice" label={__('Terms of Service')} />,
             }}
           >
             Do you agree to the %terms%?
@@ -177,7 +130,7 @@ function PrivacyAgreement(props: Props) {
             onChange={e => setAgree(!e.target.checked)}
           />
         </fieldset>
-        {share === 'none' && (
+        {share === NONE && (
           <>
             <p className="help">
               {__(

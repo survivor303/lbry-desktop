@@ -1,5 +1,4 @@
 import { Lbry, ACTIONS, doToast, SHARED_PREFERENCES, doWalletReconnect, SETTINGS } from 'lbry-redux';
-// import * as SETTINGS from 'constants/settings';
 import * as LOCAL_ACTIONS from 'constants/action_types';
 import analytics from 'analytics';
 import SUPPORTED_LANGUAGES from 'constants/supported_languages';
