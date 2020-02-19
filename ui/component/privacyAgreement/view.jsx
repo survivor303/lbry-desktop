@@ -27,13 +27,12 @@ function PrivacyAgreement(props: Props) {
     } else if (share === 'limited') {
       setShareDataInternal(true);
       setShareDataThirdParty(false);
-      // enable internal
     } else {
       setShareDataInternal(false);
       setShareDataThirdParty(false);
     }
     setWelcomeVersion();
-    history.push(`/$/${PAGES.HOME}`);
+    history.replace(`/`);
   }
 
   return (

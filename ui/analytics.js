@@ -49,8 +49,8 @@ type LogPublishParams = {
   channel_claim_id?: string,
 };
 
-let internalAnalyticsEnabled: boolean = false;
-let thirdPartyAnalyticsEnabled: boolean = false;
+let internalAnalyticsEnabled: boolean = IS_WEB || false;
+let thirdPartyAnalyticsEnabled: boolean = IS_WEB || false;
 
 const analytics: Analytics = {
   error: message => {
