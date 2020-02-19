@@ -971,5 +971,6 @@
   "No information will be sent directly to LBRY, Inc. or third-parties about your usage. Note that as\n                peer-to-peer software, your IP address and potentially other system information can be sent to other\n                users, though this information is not stored permanently.": "No information will be sent directly to LBRY, Inc. or third-parties about your usage. Note that as\n                peer-to-peer software, your IP address and potentially other system information can be sent to other\n                users, though this information is not stored permanently.",
   "Let's go": "Let's go",
   "Do you agree to the %terms%?": "Do you agree to the %terms%?",
-  "While we respect the desire for maximally private usage, please note that choosing this option hurts the ability for creators to understand how their content is performing.": "While we respect the desire for maximally private usage, please note that choosing this option hurts the ability for creators to understand how their content is performing."
+  "While we respect the desire for maximally private usage, please note that choosing this option hurts the ability for creators to understand how their content is performing.": "While we respect the desire for maximally private usage, please note that choosing this option hurts the ability for creators to understand how their content is performing.",
+  "A copy of your wallet is synced to lbry.tv": "A copy of your wallet is synced to lbry.tv"
 }

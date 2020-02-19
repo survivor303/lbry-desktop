@@ -133,7 +133,9 @@ function AppRouter(props: Props) {
 
   return (
     <Switch>
+      {/* @if TARGET='app' */}
       {welcomeVersion < WELCOME_VERSION && <Route path="/*" component={Welcome} />}
+      {/* @endif */}
       <Route path={`/`} exact component={HomePage} />
       <Route path={`/$/${PAGES.DISCOVER}`} exact component={DiscoverPage} />
       <Route path={`/$/${PAGES.AUTH}`} exact component={SignInPage} />

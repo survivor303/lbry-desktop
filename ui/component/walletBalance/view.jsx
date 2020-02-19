@@ -13,10 +13,11 @@ type Props = {
   supportsBalance: number,
   tipsBalance: number,
   doOpenModal: string => void,
+  hasSynced: boolean,
 };
 
 const WalletBalance = (props: Props) => {
-  const { balance, claimsBalance, supportsBalance, tipsBalance, doOpenModal } = props;
+  const { balance, claimsBalance, supportsBalance, tipsBalance, doOpenModal, hasSynced } = props;
 
   return (
     <React.Fragment>
@@ -36,6 +37,16 @@ const WalletBalance = (props: Props) => {
               onClick={() => doOpenModal(MODALS.WALLET_SEND)}
             />
           </div>
+          {/* @if TARGET='app' */}
+          {Boolean(hasSynced) && (
+            <div className="section">
+              <div className="section__flex">
+                <Icon sectionIcon iconColor={'blue'} icon={ICONS.ACCOUNT} />
+                <h2 className="section__title--small">{__('A copy of your wallet is synced to lbry.tv')}</h2>
+              </div>
+            </div>
+          )}
+          {/* @endif */}
         </div>
 
         <div>
