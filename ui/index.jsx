@@ -79,7 +79,6 @@ Lbry.setOverride(
 // @endif
 
 const startTime = Date.now();
-analytics.startupEvent();
 
 // @if TARGET='app'
 const { autoUpdater } = remote.require('electron-updater');

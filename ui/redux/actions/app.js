@@ -486,12 +486,14 @@ export function doGetAndPopulatePreferences() {
 
       if (savedPreferences !== null) {
         dispatch(doPopulateSharedUserState(savedPreferences));
+        // @if TARGET='app'
         const { settings } = savedPreferences.value;
         Object.entries(settings).forEach(([key, val]) => {
           if (daemonSettings[key] !== val) {
             dispatch(doSetDaemonSetting(key, val, false));
           }
         });
+        // @endif
       }
     }
 
