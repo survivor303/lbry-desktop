@@ -16,6 +16,9 @@ const LBRY_TV_UA_ID = 'UA-60403362-12';
 const DESKTOP_UA_ID = 'UA-60403362-13';
 const SECOND_TRACKER_NAME = 'tracker2';
 
+const SHARE_INTERNAL = 'shareInternal';
+const SHARE_THIRD_PARTY = 'shareThirdParty';
+
 // @if TARGET='app'
 ElectronCookies.enable({
   origin: 'https://lbry.tv',
@@ -51,6 +54,10 @@ type LogPublishParams = {
 
 let internalAnalyticsEnabled: boolean = IS_WEB || false;
 let thirdPartyAnalyticsEnabled: boolean = IS_WEB || false;
+// @if TARGET='app'
+if (window.localStorage.getItem(SHARE_INTERNAL) === 'true') internalAnalyticsEnabled = true;
+if (window.localStorage.getItem(SHARE_THIRD_PARTY) === 'true') thirdPartyAnalyticsEnabled = true;
+// @endif
 
 const analytics: Analytics = {
   error: message => {
@@ -99,6 +106,7 @@ const analytics: Analytics = {
     // Always collect analytics on lbry.tv
     // @if TARGET='app'
     internalAnalyticsEnabled = enabled;
+    window.localStorage.setItem(SHARE_INTERNAL, enabled);
     // @endif
   },
 
@@ -106,6 +114,7 @@ const analytics: Analytics = {
     // Always collect analytics on lbry.tv
     // @if TARGET='app'
     thirdPartyAnalyticsEnabled = enabled;
+    window.localStorage.setItem(SHARE_THIRD_PARTY, enabled);
     // @endif
   },
 

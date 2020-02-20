@@ -79,6 +79,7 @@ Lbry.setOverride(
 // @endif
 
 const startTime = Date.now();
+analytics.startupEvent();
 
 // @if TARGET='app'
 const { autoUpdater } = remote.require('electron-updater');
@@ -284,8 +285,6 @@ function AppWrapper() {
 
   useEffect(() => {
     if (readyToLaunch && persistDone) {
-      analytics.startupEvent();
-
       app.store.dispatch(doUpdateIsNightAsync());
       app.store.dispatch(doDaemonReady());
       app.store.dispatch(doBlackListedOutpointsSubscribe());
