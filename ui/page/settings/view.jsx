@@ -2,7 +2,6 @@
 /* eslint react/no-unescaped-entities:0 */
 /* eslint react/jsx-no-comment-textnodes:0 */
 
-// import * as SETTINGS from 'constants/settings';
 import * as PAGES from 'constants/pages';
 import * as React from 'react';
 

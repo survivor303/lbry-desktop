@@ -63,7 +63,7 @@ export function doClearDaemonSetting(key) {
     });
   };
 }
-// if doPopulate is applying settings, we don't want to cause a loop; updateSharedPreference = false.
+// if doPopulate is applying settings, we don't want to cause a loop; doNotDispatch = true.
 export function doSetDaemonSetting(key, value, doNotDispatch = false) {
   return dispatch => {
     const newSettings = {
