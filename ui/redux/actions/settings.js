@@ -64,14 +64,14 @@ export function doClearDaemonSetting(key) {
   };
 }
 // if doPopulate is applying settings, we don't want to cause a loop; updateSharedPreference = false.
-export function doSetDaemonSetting(key, value, updateSharedPreference = true) {
+export function doSetDaemonSetting(key, value, doNotDispatch = false) {
   return dispatch => {
     const newSettings = {
       key,
       value: !value && value !== false ? null : value,
     };
     Lbry.settings_set(newSettings).then(newSetting => {
-      if (Object.values(SHARED_PREFERENCES).includes(key) && updateSharedPreference) {
+      if (Object.values(SHARED_PREFERENCES).includes(key) && !doNotDispatch) {
         dispatch({
           type: ACTIONS.SHARED_PREFERENCE_SET,
           data: { key: key, value: newSetting[key] },

@@ -458,21 +458,16 @@ export function doSetWelcomeVersion(version) {
   };
 }
 
-export function doToggle3PAnalytics(allow) {
+export function doToggle3PAnalytics(allowParam, doNotDispatch) {
   return (dispatch, getState) => {
-    if (allow !== undefined) {
-      analytics.toggleThirdParty(allow);
+    const state = getState();
+    const allowState = selectAllowAnalytics(state);
+    const allow = allowParam !== undefined ? allowParam : allowState;
+    analytics.toggleThirdParty(allow);
+    if (!doNotDispatch) {
       return dispatch({
         type: ACTIONS.SET_ALLOW_ANALYTICS,
         data: allow,
-      });
-    } else {
-      const state = getState();
-      const allowAnalytics = selectAllowAnalytics(state);
-      analytics.toggleThirdParty(allowAnalytics);
-      return dispatch({
-        type: ACTIONS.SET_ALLOW_ANALYTICS,
-        data: allowAnalytics,
       });
     }
   };
@@ -487,12 +482,16 @@ export function doGetAndPopulatePreferences() {
       if (savedPreferences !== null) {
         dispatch(doPopulateSharedUserState(savedPreferences));
         // @if TARGET='app'
-        const { settings } = savedPreferences.value;
+        const { settings, sharing_3P: sharing3P } = savedPreferences.value;
         Object.entries(settings).forEach(([key, val]) => {
           if (daemonSettings[key] !== val) {
             dispatch(doSetDaemonSetting(key, val, false));
           }
         });
+        if (sharing3P !== undefined) {
+          doToggle3PAnalytics(sharing3P, true);
+        }
+        // also doToggle
         // @endif
       }
     }

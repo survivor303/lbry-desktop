@@ -5,6 +5,7 @@ import I18nMessage from 'component/i18nMessage';
 import { FormField } from 'component/common/form-components/form-field';
 import { Form } from 'component/common/form-components/form';
 import { withRouter } from 'react-router-dom';
+// $FlowFixMe cannot resolve ...
 import image from 'static/img/unlocklbry.svg';
 
 const FREE = 'free';
@@ -15,7 +16,7 @@ type Props = {
   setWelcomeVersion: () => void,
   setShareDataInternal: boolean => void,
   setShareDataThirdParty: boolean => void,
-  history: { push: string => void },
+  history: { replace: string => void },
 };
 
 function PrivacyAgreement(props: Props) {
@@ -63,8 +64,7 @@ function PrivacyAgreement(props: Props) {
             type="radio"
             label={
               <>
-                {/*<span className="emoji">😄</span>*/}
-                {__('Yes, including with third-party analytics platforms')}
+                <span className="emoji">😄</span> {__('Yes, including with third-party analytics platforms')}
               </>
             }
             helper={__(`Sending information to third parties (e.g. Google Analytics or Mixpanel) allows us to use detailed
@@ -78,8 +78,7 @@ function PrivacyAgreement(props: Props) {
             checked={share === LIMITED}
             label={
               <>
-                {/*<span className="emoji">🙂</span>*/}
-                {__('Yes, but only with LBRY, Inc.')}
+                <span className="emoji">🙂</span> {__('Yes, but only with LBRY, Inc.')}
               </>
             }
             helper={__(
@@ -94,8 +93,7 @@ function PrivacyAgreement(props: Props) {
             checked={share === NONE}
             label={
               <>
-                {/*<span className="emoji">😢</span>*/}
-                {__('No')}
+                <span className="emoji">😢</span> {__('No')}
               </>
             }
             helper={__(`No information will be sent directly to LBRY, Inc. or third-parties about your usage. Note that as

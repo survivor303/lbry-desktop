@@ -1,6 +1,7 @@
 // @flow
 
 import * as ACTIONS from 'constants/action_types';
+import { ACTIONS as LBRY_REDUX_ACTIONS } from 'lbry-redux';
 import { remote } from 'electron';
 
 // @if TARGET='app'
@@ -274,6 +275,15 @@ reducers[ACTIONS.TOGGLE_SEARCH_EXPANDED] = state =>
   Object.assign({}, state, {
     searchOptionsExpanded: !state.searchOptionsExpanded,
   });
+
+reducers[LBRY_REDUX_ACTIONS.USER_STATE_POPULATE] = (state, action) => {
+  const { welcomeVersion, allowAnalytics } = action.data;
+  return {
+    ...state,
+    welcomeVersion,
+    allowAnalytics,
+  };
+};
 
 export default function reducer(state: AppState = defaultState, action: any) {
   const handler = reducers[action.type];

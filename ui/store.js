@@ -120,6 +120,8 @@ const triggerSharedStateActions = [
   LBRY_REDUX_ACTIONS.TOGGLE_BLOCK_CHANNEL,
   LBRY_REDUX_ACTIONS.CREATE_CHANNEL_COMPLETED,
   LBRY_REDUX_ACTIONS.SHARED_PREFERENCE_SET,
+  ACTIONS.SET_WELCOME_VERSION,
+  ACTIONS.SET_ALLOW_ANALYTICS,
 ];
 
 /**
@@ -142,6 +144,9 @@ const sharedStateFilters = {
   },
   blocked: { source: 'blocked', property: 'blockedChannels' },
   settings: { source: 'settings', property: 'sharedPreferences' },
+  app_welcome_version: { source: 'app', property: 'welcomeVersion' },
+  tv_welcome_version: { source: 'app', property: 'tvWelcomeVersion' },
+  sharing_3P: { source: 'app', property: 'allowAnalytics' },
 };
 
 const sharedStateCb = ({ dispatch, getState }) => {
