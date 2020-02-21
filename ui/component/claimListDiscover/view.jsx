@@ -74,8 +74,11 @@ function ClaimListDiscover(props: Props) {
     headerLabel,
     header,
     name,
+    claimType,
+    pageSize,
     renderProperties,
     includeSupportAction,
+    noInfiniteScroll,
   } = props;
   const didNavigateForward = history.action === 'PUSH';
   const [page, setPage] = useState(1);
@@ -97,7 +100,7 @@ function ClaimListDiscover(props: Props) {
     release_time?: string,
     name?: string,
   } = {
-    page_size: PAGE_SIZE,
+    page_size: pageSize || PAGE_SIZE,
     page,
     name,
     // no_totals makes it so the sdk doesn't have to calculate total number pages for pagination
@@ -153,6 +156,10 @@ function ClaimListDiscover(props: Props) {
           .unix()
       )}`;
     }
+  }
+
+  if (claimType) {
+    options.claim_type = claimType;
   }
 
   const hasMatureTags = tags && tags.some(t => MATURE_TAGS.includes(t));
@@ -219,7 +226,7 @@ function ClaimListDiscover(props: Props) {
   }
 
   function handleScrollBottom() {
-    if (!loading) {
+    if (!loading && !noInfiniteScroll) {
       setPage(page + 1);
     }
   }

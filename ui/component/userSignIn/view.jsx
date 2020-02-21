@@ -4,6 +4,7 @@ import { withRouter } from 'react-router';
 import UserEmailNew from 'component/userEmailNew';
 import UserEmailVerify from 'component/userEmailVerify';
 import UserFirstChannel from 'component/userFirstChannel';
+import UserChannelFollowIntro from 'component/userChannelFollowIntro';
 import { DEFAULT_BID_FOR_FIRST_CHANNEL } from 'component/userFirstChannel/view';
 import { rewards as REWARDS, YOUTUBE_STATUSES } from 'lbryinc';
 import UserVerify from 'component/userVerify';
@@ -115,6 +116,7 @@ function UserSignIn(props: Props) {
     showEmailVerification && <UserEmailVerify />,
     showUserVerification && <UserVerify skipLink={redirect} />,
     showChannelCreation && <UserFirstChannel />,
+    true && <UserChannelFollowIntro />,
     showYoutubeTransfer && (
       <div>
         <YoutubeTransferStatus /> <Confetti recycle={false} style={{ position: 'fixed' }} />

@@ -962,5 +962,11 @@
   "Sign in with lbry.tv to receive notifications about new content.": "Sign in with lbry.tv to receive notifications about new content.",
   "Find new channels to follow": "Find new channels to follow",
   "You aren't currently following any channels. %discover_channels_link%.": "You aren't currently following any channels. %discover_channels_link%.",
-  "LBRY Works Better If You Are Following Channels": "LBRY Works Better If You Are Following Channels"
+  "LBRY Works Better If You Are Following Channels": "LBRY Works Better If You Are Following Channels",
+  "Find Channels to follow": "Find Channels to follow",
+  "LBRY works better if you find and follow at least 5 creators you like.": "LBRY works better if you find and follow at least 5 creators you like.",
+  "Nice! You are currently following 3 creators": "Nice! You are currently following 3 creators",
+  "LBRY works better if you find and follow at least 5 creators you like. You can also block channels you never want to see.": "LBRY works better if you find and follow at least 5 creators you like. You can also block channels you never want to see.",
+  "Nice! You are currently following %followingCount% creator": "Nice! You are currently following %followingCount% creator",
+  "Nice! You are currently following %followingCount% creators": "Nice! You are currently following %followingCount% creators"
 }

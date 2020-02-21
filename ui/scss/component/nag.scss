@@ -1,5 +1,6 @@
 .nag {
   position: fixed;
+  left: 0;
   bottom: 0;
   width: 100%;
   padding: var(--spacing-small);
@@ -7,6 +8,11 @@
   color: var(--color-white);
   font-weight: var(--font-weight-bold);
   text-align: center;
+}
+
+.nag--helpful {
+  background-color: var(--color-secondary-alt);
+  color: var(--color-primary);
 }
 
 .nag__button {
@@ -21,6 +27,16 @@
   &:hover {
     background-color: var(--color-white);
     color: var(--color-nag);
+  }
+}
+
+.nag__button--helpful {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+
+  &:hover {
+    background-color: var(--color-primary);
+    color: var(--color-white);
   }
 }
 

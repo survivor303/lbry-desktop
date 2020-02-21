@@ -133,6 +133,8 @@ function AppRouter(props: Props) {
       <Redirect from={`/$/${PAGES.CHANNELS_FOLLOWING_MANAGE}`} to={`/$/${PAGES.CHANNELS_FOLLOWING_DISCOVER}`} />
 
       <Route path={`/`} exact component={HomePage} />
+      {/* <Route path={`/`} exact component={SignInPage} /> */}
+
       <Route path={`/$/${PAGES.DISCOVER}`} exact component={DiscoverPage} />
       <Route path={`/$/${PAGES.AUTH}`} exact component={SignInPage} />
       <Route path={`/$/${PAGES.TAGS}`} exact component={TagsPage} />
