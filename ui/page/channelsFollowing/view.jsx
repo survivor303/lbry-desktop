@@ -1,7 +1,7 @@
 // @flow
 import * as PAGES from 'constants/pages';
 import * as ICONS from 'constants/icons';
-import { SORT_NEW } from 'constants/claim_search';
+import { ORDER_BY_NEW } from 'constants/claim_search';
 import React from 'react';
 import ChannelsFollowingDiscoverPage from 'page/channelsFollowingDiscover';
 import ClaimListDiscover from 'component/claimListDiscover';
@@ -28,7 +28,7 @@ function ChannelsFollowingPage(props: Props) {
             {__('Following')}
           </span>
         }
-        defaultTypeSort={SORT_NEW}
+        orderBy={ORDER_BY_NEW}
         channelIds={subscribedChannels.map(sub => sub.uri.split('#')[1])}
         meta={
           <Button

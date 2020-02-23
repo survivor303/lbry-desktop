@@ -982,5 +982,16 @@
   "Do you agree to the %terms%?": "Do you agree to the %terms%?",
   "While we respect the desire for maximally private usage, please note that choosing this option hurts the ability for creators to understand how their content is performing.": "While we respect the desire for maximally private usage, please note that choosing this option hurts the ability for creators to understand how their content is performing.",
   "A copy of your wallet is synced to lbry.tv": "A copy of your wallet is synced to lbry.tv",
-  "Internal sharing is required while signed in.": "Internal sharing is required while signed in."
+  "Internal sharing is required while signed in.": "Internal sharing is required while signed in.",
+  "How Long": "How Long",
+  "Long": "Long",
+  "Short": "Short",
+  "Any": "Any",
+  "How Fresh": "How Fresh",
+  "View top claims for %normalized_uri%": "View top claims for %normalized_uri%",
+  "Top claims at lbry://%name%": "Top claims at lbry://%name%",
+  "File Type": "File Type",
+  "Video": "Video",
+  "Document": "Document",
+  "Claim Type": "Claim Type"
 }

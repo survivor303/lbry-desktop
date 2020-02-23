@@ -12,27 +12,12 @@ import ClaimList from 'component/claimList';
 import ClaimPreview from 'component/claimPreview';
 import { toCapitalCase } from 'util/string';
 import I18nMessage from 'component/i18nMessage';
-
-const PAGE_SIZE = 20;
-export const TIME_DAY = 'day';
-export const TIME_WEEK = 'week';
-export const TIME_MONTH = 'month';
-export const TIME_YEAR = 'year';
-export const TIME_ALL = 'all';
-
-export const TYPE_TRENDING = 'trending';
-export const TYPE_TOP = 'top';
-export const TYPE_NEW = 'new';
-
-const SEARCH_TYPES = [TYPE_TRENDING, TYPE_NEW, TYPE_TOP];
-const SEARCH_TIMES = [TIME_DAY, TIME_WEEK, TIME_MONTH, TIME_YEAR, TIME_ALL];
-import DiscoverSearchOptions from 'component/discoverSearchOptions';
+import * as ICONS from '../../constants/icons';
 
 type Props = {
   uris: Array<string>,
   subscribedChannels: Array<Subscription>,
   doClaimSearch: ({}) => void,
-  tags: Array<string>,
   loading: boolean,
   personalView: boolean,
   doToggleTagFollow: string => void,
@@ -46,18 +31,25 @@ type Props = {
   hiddenUris: Array<string>,
   hiddenNsfwMessage?: Node,
   channelIds?: Array<string>,
-  defaultTypeSort?: string,
-  defaultTimeSort?: string,
-  defaultOrderBy?: Array<string>,
+  tags: Array<string>,
+  orderBy?: Array<string>,
+  defaultOrderBy?: string,
+  freshness?: string,
+  defaultFreshness?: string,
   header?: Node,
   headerLabel?: string | Node,
   name?: string,
   claimType?: string | Array<string>,
+  defaultClaimType?: string | Array<string>,
+  streamType?: string | Array<string>,
+  defaultStreamType?: string | Array<string>,
   renderProperties?: Claim => Node,
   includeSupportAction?: boolean,
+  noCustom?: boolean,
 };
 
 function ClaimListDiscover(props: Props) {
+  // props come in with val, defaultVal, url params.
   const {
     doClaimSearch,
     claimSearchByQuery,
@@ -71,48 +63,54 @@ function ClaimListDiscover(props: Props) {
     location,
     hiddenUris,
     hiddenNsfwMessage,
-    defaultTypeSort,
-    defaultTimeSort,
     defaultOrderBy,
+    orderBy,
     headerLabel,
     header,
     name,
     claimType,
+    defaultClaimType,
+    streamType,
+    defaultStreamType,
+    freshness,
+    defaultFreshness,
     renderProperties,
     includeSupportAction,
+    noCustom,
   } = props;
   const didNavigateForward = history.action === 'PUSH';
   const [page, setPage] = useState(1);
   const { search } = location;
+  console.log('SEARCH', search);
   const [forceRefresh, setForceRefresh] = useState();
+  const [expanded, setExpanded] = useState(false);
   const urlParams = new URLSearchParams(search);
-  const typeSort = urlParams.get('type') || defaultTypeSort || TYPE_TRENDING;
-  const timeSort = urlParams.get('time') || defaultTimeSort || TIME_WEEK;
-  const tagsInUrl = urlParams.get('t') || '';
+  console.log('URL PARAMS', urlParams);
 
-  // // custom params:
-  // const sortParam = urlParams.get('sort') || defaultTypeSort || CS.SORT_TRENDING;
-  // const timeParam = urlParams.get('time') || CS.TIME_WEEK;
-  // const durationParam = urlParams.get('d') || '';
-  // const streamTypeParam = urlParams.get('f') || '';
-  //
+  const tagsParam = tags || urlParams.get(CS.TAGS_KEY) || null;
+  const orderParam = orderBy || urlParams.get(CS.ORDER_BY_KEY) || defaultOrderBy || CS.ORDER_BY_TRENDING;
+  const freshnessParam = freshness || urlParams.get(CS.FRESH_KEY) || defaultFreshness || CS.FRESH_WEEK;
+  const claimTypeParam = claimType || urlParams.get(CS.CLAIM_TYPE_KEY) || defaultClaimType || CS.CLAIM_ALL;
+  const streamTypeParam = streamType || urlParams.get(CS.FILE_KEY) || defaultStreamType || CS.FILE_ALL;
+  const durationParam = urlParams.get(CS.DURATION_KEY) || '';
+  console.log('1 INPUT', { tagsParam, orderParam, freshnessParam, claimTypeParam, streamTypeParam, durationParam });
+  // Build options object
   const options: {
     page_size: number,
     page: number,
     no_totals: boolean,
     any_tags: Array<string>,
+    not_tags: Array<string>,
     channel_ids: Array<string>,
     not_channel_ids: Array<string>,
-    not_tags: Array<string>,
     order_by: Array<string>,
     release_time?: string,
     name?: string,
     duration?: string,
-    stream_type?: string,
     claim_type?: string | Array<string>,
     stream_types?: any,
   } = {
-    page_size: PAGE_SIZE,
+    page_size: CS.PAGE_SIZE,
     page,
     name,
     // no_totals makes it so the sdk doesn't have to calculate total number pages for pagination
@@ -125,38 +123,40 @@ function ClaimListDiscover(props: Props) {
       !channelIds && hiddenUris && hiddenUris.length ? hiddenUris.map(hiddenUri => hiddenUri.split('#')[1]) : [],
     not_tags: !showNsfw ? MATURE_TAGS : [],
     order_by:
-      defaultOrderBy ||
-      (typeSort === TYPE_TRENDING
-        ? ['trending_group', 'trending_mixed']
-        : typeSort === TYPE_NEW
-        ? ['release_time']
-        : ['effective_amount']), // Sort by top
+      orderParam === CS.ORDER_BY_TRENDING
+        ? CS.ORDER_BY_TRENDING_VALUE
+        : orderParam === CS.ORDER_BY_NEW
+        ? CS.ORDER_BY_NEW_VALUE
+        : CS.ORDER_BY_TOP_VALUE, // Sort by top
   };
 
-  if (typeSort === TYPE_TOP && timeSort !== TIME_ALL) {
+  // only show custom order when?
+  if (orderParam === CS.ORDER_BY_TOP && freshness !== CS.FRESH_ALL) {
     options.release_time = `>${Math.floor(
       moment()
-        .subtract(1, timeSort)
+        .subtract(1, freshness)
         .startOf('hour')
         .unix()
     )}`;
-  } else if (typeSort === TYPE_NEW || typeSort === TYPE_TRENDING) {
+  } else if (orderParam === CS.ORDER_BY_NEW || orderParam === CS.ORDER_BY_TRENDING) {
     // Warning - hack below
     // If users are following more than 10 channels or tags, limit results to stuff less than a year old
     // For more than 20, drop it down to 6 months
     // This helps with timeout issues for users that are following a ton of stuff
     // https://github.com/lbryio/lbry-sdk/issues/2420
     if (options.channel_ids.length > 20 || options.any_tags.length > 20) {
+      console.log('STRONG THROTTLE');
       options.release_time = `>${Math.floor(
         moment()
-          .subtract(6, TIME_MONTH)
+          .subtract(3, CS.FRESH_MONTH)
           .startOf('week')
           .unix()
       )}`;
     } else if (options.channel_ids.length > 10 || options.any_tags.length > 10) {
+      console.log('WEAK THROTTLE');
       options.release_time = `>${Math.floor(
         moment()
-          .subtract(1, TIME_YEAR)
+          .subtract(1, CS.FRESH_YEAR)
           .startOf('week')
           .unix()
       )}`;
@@ -180,13 +180,17 @@ function ClaimListDiscover(props: Props) {
 
   if (streamTypeParam && CS.FILE_TYPES.includes(streamTypeParam)) {
     if (streamTypeParam !== CS.FILE_ALL) {
-      options.stream_types = streamTypeParam;
+      options.stream_types = [streamTypeParam];
     }
   }
 
-  if (claimType) {
-    options.claim_type = claimType;
+  if (claimTypeParam && CS.CLAIM_TYPES.includes(claimTypeParam)) {
+    if (claimTypeParam !== CS.CLAIM_ALL) {
+      options.claim_type = claimTypeParam;
+    }
   }
+
+  console.log('2 OPTS', options);
 
   const hasMatureTags = tags && tags.some(t => MATURE_TAGS.includes(t));
   const claimSearchCacheQuery = createNormalizedClaimSearchKey(options);
@@ -194,7 +198,7 @@ function ClaimListDiscover(props: Props) {
   const shouldPerformSearch =
     uris.length === 0 ||
     didNavigateForward ||
-    (!loading && uris.length < PAGE_SIZE * page && uris.length % PAGE_SIZE === 0);
+    (!loading && uris.length < CS.PAGE_SIZE * page && uris.length % CS.PAGE_SIZE === 0);
   // Don't use the query from createNormalizedClaimSearchKey for the effect since that doesn't include page & release_time
   const optionsStringForEffect = JSON.stringify(options);
 
@@ -230,61 +234,87 @@ function ClaimListDiscover(props: Props) {
   function getSearch() {
     let search = `?`;
     if (!personalView) {
-      search += `t=${tagsInUrl}&`;
+      search += `${CS.TAGS_KEY}=${tagsParam}&`;
     }
 
     return search;
   }
 
-  function handleTypeSort(newTypeSort) {
-    let url = `${getSearch()}type=${newTypeSort}`;
-    if (newTypeSort === TYPE_TOP) {
-      url += `&time=${timeSort}`;
+  function getTimeForFreshnessParam(param) {
+    switch (param) {
+      case CS.FRESH_DAY:
+      case CS.FRESH_WEEK:
+      case CS.FRESH_MONTH:
+      case CS.FRESH_YEAR:
     }
+  }
 
+  function handleChange(change) {
+    const url = buildUrl(change);
     setPage(1);
     history.push(url);
   }
 
-  function handleTimeSort(newTimeSort) {
-    setPage(1);
-    history.push(`${getSearch()}type=${typeSort}&time=${newTimeSort}`);
-  }
+  function buildUrl(delta) {
+    console.log('3 DELTA OBJECT', delta);
+    const newUrl = new URLSearchParams();
 
-  function handleChange(ob) {
-    const url = buildUrl(ob);
-    setPage(1);
-    history.push(url);
-  }
-
-  function buildUrl(ob) {
-    let url = `${getSearch()}`;
-
-    if (personalView) {
-      url += ob.key === 'sort' ? `&sort=${ob.value}` : `&sort=${sortParam}`;
-    } else {
-      url += ob.key === 'sort' ? `sort=${ob.value}` : `sort=${sortParam}`;
+    if (delta.key === CS.CLEAR_KEY) {
+      // do stuff to clear querystring
     }
 
-    if (timeParam || ob.key === CS.TIME_KEY) {
-      // || top
-      if (ob.value !== CS.TIME_ALL) {
-        url += ob.key === 'time' ? `&time=${ob.value}` : `&time=${timeParam}`;
+    if (orderBy) {
+      newUrl.append(CS.ORDER_BY_KEY, orderParam);
+    } else if (delta.key === CS.ORDER_BY_KEY) {
+      newUrl.append(CS.ORDER_BY_KEY, delta.value);
+    } else if (orderParam) {
+      newUrl.append(CS.ORDER_BY_KEY, orderParam);
+    }
+
+    if (tags) {
+      newUrl.append(CS.TAGS_KEY, tagsParam);
+    } else if (delta.key === CS.TAGS_KEY) {
+      newUrl.append(CS.TAGS_KEY, delta.value);
+    } else if (tagsParam) {
+      newUrl.append(CS.TAGS_KEY, tagsParam);
+    }
+
+    // below some level is custom only
+
+    if (freshness) {
+      newUrl.append(CS.FRESH_KEY, freshness);
+    } else if (delta.key === CS.FRESH_KEY && delta.value !== CS.FRESH_ALL) {
+      newUrl.append(CS.FRESH_KEY, delta.value);
+    } else if (freshnessParam && freshnessParam !== CS.FRESH_ALL) {
+      newUrl.append(CS.FRESH_KEY, freshnessParam);
+    }
+
+    if (claimType) {
+      // maybe not do this?
+      newUrl.append(CS.CLAIM_TYPE_KEY, claimType);
+    } else if (delta.key === CS.CLAIM_TYPE_KEY && delta.value !== CS.CLAIM_ALL) {
+      newUrl.append(CS.CLAIM_TYPE_KEY, delta.value);
+    } else if (claimTypeParam && claimTypeParam !== CS.CLAIM_ALL) {
+      newUrl.append(CS.CLAIM_TYPE_KEY, claimTypeParam);
+    }
+    if (options.claim_type !== CS.CLAIM_CHANNEL) {
+      if (streamType) {
+        newUrl.append(CS.FILE_KEY, streamType);
+      } else if (delta.key === CS.FILE_KEY && delta.value !== CS.FILE_ALL) {
+        newUrl.append(CS.FILE_KEY, delta.value);
+      } else if (streamTypeParam && streamTypeParam !== CS.FILE_ALL) {
+        newUrl.append(CS.FILE_KEY, streamTypeParam);
       }
-    }
-    if (ob.key !== CS.CLEAR_KEY) {
-      if (streamTypeParam || ob.key === CS.FILE_KEY) {
-        if (ob.value !== CS.FILE_ALL) {
-          url += ob.key === 'streamType' ? `&f=${ob.value}` : `&f=${streamTypeParam}`;
+
+      if (delta.key === CS.DURATION_KEY) {
+        if (delta.value !== CS.DURATION_ALL) {
+          newUrl.append(CS.DURATION_KEY, delta.value);
         }
       }
-      if (durationParam || ob.key === CS.DURATION_KEY) {
-        if (ob.value !== CS.DURATION_ALL) {
-          url += ob.key === 'duration' ? `&d=${ob.value}` : `&d=${durationParam}`;
-        }
-      }
     }
-    return url;
+
+    console.log('4 NEW URL', newUrl.toString());
+    return `?${newUrl.toString()}`;
   }
 
   function handleScrollBottom() {
@@ -302,45 +332,170 @@ function ClaimListDiscover(props: Props) {
 
   const defaultHeader = (
     <Fragment>
-      {SEARCH_TYPES.map(type => (
-        <Button
-          key={type}
-          button="alt"
-          onClick={() => handleTypeSort(type)}
-          className={classnames(`button-toggle button-toggle--${type}`, {
-            'button-toggle--active': typeSort === type,
-          })}
-          icon={toCapitalCase(type)}
-          label={__(toCapitalCase(type))}
-        />
-      ))}
+      <div className={'claim-search__wrapper'}>
+        {CS.ORDER_BY_TYPES.map(type => (
+          <Button
+            key={type}
+            button="alt"
+            onClick={e =>
+              handleChange({
+                key: CS.ORDER_BY_KEY,
+                value: type,
+              })
+            }
+            className={classnames(`button-toggle button-toggle--${type}`, {
+              'button-toggle--active': orderParam === type,
+            })}
+            icon={toCapitalCase(type)}
+            label={__(toCapitalCase(type))}
+          />
+        ))}
+        {!noCustom && (
+          <Button
+            button={'alt'}
+            aria-label={__('More')}
+            className={classnames(`button-toggle button-toggle--top`, {
+              'button-toggle--active': expanded,
+            })}
+            icon={toCapitalCase(ICONS.SETTINGS)}
+            onClick={() => setExpanded(!expanded)}
+          />
+        )}
+        {expanded && (
+          <div className={classnames('card--inline', `claim-search__menus`)}>
+            {/* FRESHNESS FIELD */}
+            {orderParam === CS.ORDER_BY_TOP && (
+              <div className={'claim-search__input-container'}>
+                <FormField
+                  className="claim-search__dropdown"
+                  type="select"
+                  name="trending_time"
+                  label={__('How Fresh')}
+                  value={freshnessParam}
+                  onChange={e =>
+                    handleChange({
+                      key: CS.FRESH_KEY,
+                      value: e.target.value,
+                    })
+                  }
+                >
+                  {CS.FRESH_TYPES.map(time => (
+                    <option key={time} value={time}>
+                      {/* i18fixme */}
+                      {time === CS.FRESH_DAY && __('Today')}
+                      {time !== CS.FRESH_ALL &&
+                        time !== CS.FRESH_DAY &&
+                        __('This ' + toCapitalCase(time)) /* yes, concat before i18n, since it is read from const */}
+                      {time === CS.FRESH_ALL && __('All time')}
+                    </option>
+                  ))}
+                </FormField>
+              </div>
+            )}
+            {/* CLAIM_TYPES FIELD */}
+            <div className={'claim-search__input-container'}>
+              <FormField
+                className="claim-search__dropdown"
+                type="select"
+                name="claimType"
+                label={__('Claim Type')}
+                value={options.stream_type || CS.FILE_ALL}
+                onChange={e =>
+                  handleChange({
+                    key: CS.CLAIM_TYPE_KEY,
+                    value: e.target.value,
+                  })
+                }
+              >
+                {CS.CLAIM_TYPES.map(type => (
+                  <option key={type} value={type}>
+                    {/* i18fixme */}
+                    {type === CS.CLAIM_CHANNEL && __('Channel')}
+                    {type === CS.CLAIM_STREAM && __('Content')}
+                    {type === CS.CLAIM_REPOST && __('Repost')}
+                    {type === CS.CLAIM_ALL && __('Any')}
+                  </option>
+                ))}
+              </FormField>
+            </div>
+            {/* FILE_TYPES FIELD */}
+            {options.claim_type !== CS.CLAIM_CHANNEL && (
+              <>
+                <div className={'claim-search__input-container'}>
+                  <FormField
+                    className="claim-search__dropdown"
+                    type="select"
+                    name="fileType"
+                    label={__('File Type')}
+                    disabled={options.claim_type === CS.CLAIM_CHANNEL}
+                    value={options.stream_type || CS.FILE_ALL}
+                    onChange={e =>
+                      handleChange({
+                        key: CS.FILE_KEY,
+                        value: e.target.value,
+                      })
+                    }
+                  >
+                    {CS.FILE_TYPES.map(type => (
+                      <option key={type} value={type}>
+                        {/* i18fixme */}
+                        {type === CS.FILE_VIDEO && __('Video')}
+                        {type === CS.FILE_AUDIO && __('Audio')}
+                        {type === CS.FILE_DOCUMENT && __('Document')}
+                        {type === CS.FILE_ALL && __('Any')}
+                      </option>
+                    ))}
+                  </FormField>
+                </div>
 
-      {typeSort === 'top' && (
-        <FormField
-          className="claim-list__dropdown"
-          type="select"
-          name="trending_time"
-          value={timeSort}
-          onChange={e => handleTimeSort(e.target.value)}
-        >
-          {SEARCH_TIMES.map(time => (
-            <option key={time} value={time}>
-              {/* i18fixme */}
-              {time === TIME_DAY && __('Today')}
-              {time !== TIME_ALL &&
-                time !== TIME_DAY &&
-                __('This ' + toCapitalCase(time)) /* yes, concat before i18n, since it is read from const */}
-              {time === TIME_ALL && __('All time')}
-            </option>
-          ))}
-        </FormField>
-      )}
-      <DiscoverSearchOptions
-        options={options}
-        sortParam={sortParam}
-        timeParam={timeParam}
-        handleChange={handleChange}
-      />
+                {/* DURATIONS FIELD */}
+                {options.stream_types !== [CS.FILE_DOCUMENT] && (
+                  <div className={'claim-search__input-container'}>
+                    <FormField
+                      className="claim-search__dropdown"
+                      label={__('How Long')}
+                      type="select"
+                      name="file_type"
+                      value={options.duration || CS.DURATION_ALL}
+                      onChange={e =>
+                        handleChange({
+                          key: CS.DURATION_KEY,
+                          value: e.target.value,
+                        })
+                      }
+                    >
+                      {CS.DURATION_TYPES.map(dur => (
+                        <option key={dur} value={dur}>
+                          {/* i18fixme */}
+                          {dur === CS.DURATION_SHORT && __('Short')}
+                          {dur === CS.DURATION_LONG && __('Long')}
+                          {dur === CS.DURATION_ALL && __('Any')}
+                        </option>
+                      ))}
+                    </FormField>
+                  </div>
+                )}
+              </>
+            )}
+            {(options.duration || options.stream_type || options.claim_type) && (
+              <div className={'claim-search__input-container'}>
+                <Button
+                  key={'clear'}
+                  button="alt"
+                  onClick={e =>
+                    handleChange({
+                      key: CS.CLEAR_KEY,
+                      value: true,
+                    })
+                  }
+                  label={__('Clear')}
+                />
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
       {hasMatureTags && hiddenNsfwMessage}
     </Fragment>
   );
@@ -356,14 +511,14 @@ function ClaimListDiscover(props: Props) {
         headerAltControls={meta}
         onScrollBottom={handleScrollBottom}
         page={page}
-        pageSize={PAGE_SIZE}
+        pageSize={CS.PAGE_SIZE}
         empty={noResults}
         renderProperties={renderProperties}
         includeSupportAction={includeSupportAction}
       />
 
       <div className="card">
-        {loading && new Array(PAGE_SIZE).fill(1).map((x, i) => <ClaimPreview key={i} placeholder="loading" />)}
+        {loading && new Array(CS.PAGE_SIZE).fill(1).map((x, i) => <ClaimPreview key={i} placeholder="loading" />)}
       </div>
     </React.Fragment>
   );
