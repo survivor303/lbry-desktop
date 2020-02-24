@@ -50,6 +50,7 @@ type Props = {
   header?: Node,
   headerLabel?: string | Node,
   name?: string,
+  text?: string,
   renderProperties?: Claim => Node,
   includeSupportAction?: boolean,
 };
@@ -74,6 +75,7 @@ function ClaimListDiscover(props: Props) {
     headerLabel,
     header,
     name,
+    text,
     claimType,
     pageSize,
     renderProperties,
@@ -162,6 +164,10 @@ function ClaimListDiscover(props: Props) {
     options.claim_type = claimType;
   }
 
+  if (text) {
+    options.text = text;
+  }
+
   const hasMatureTags = tags && tags.some(t => MATURE_TAGS.includes(t));
   const claimSearchCacheQuery = createNormalizedClaimSearchKey(options);
   const uris = claimSearchByQuery[claimSearchCacheQuery] || [];
@@ -174,30 +180,7 @@ function ClaimListDiscover(props: Props) {
 
   const noResults = (
     <div>
-      <p>
-        <I18nMessage
-          tokens={{
-            again: (
-              <Button
-                button="link"
-                label={__('Please try again in a few seconds.')}
-                onClick={() => setForceRefresh(Date.now())}
-              />
-            ),
-          }}
-        >
-          Sorry, your request timed out. %again%
-        </I18nMessage>
-      </p>
-      <p>
-        <I18nMessage
-          tokens={{
-            contact_support: <Button button="link" label={__('contact support')} href="https://lbry.com/faq/support" />,
-          }}
-        >
-          If you continue to have issues, please %contact_support%.
-        </I18nMessage>
-      </p>
+      <p>{__('No results found...')}</p>
     </div>
   );
 

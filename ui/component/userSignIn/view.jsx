@@ -59,6 +59,7 @@ function UserSignIn(props: Props) {
   const redirect = urlParams.get('redirect');
   const shouldRedirectImmediately = urlParams.get('immediate');
   const [initialSignInStep, setInitialSignInStep] = React.useState();
+  const [hasSeenFollowList, setHasSeenFollowList] = React.useState(false);
   const hasVerifiedEmail = user && user.has_verified_email;
   const rewardsApproved = user && user.is_reward_approved;
   const hasFetchedReward = useFetched(claimingReward);
@@ -92,6 +93,7 @@ function UserSignIn(props: Props) {
     channelCount === 0 &&
     !hasYoutubeChannels;
   const showYoutubeTransfer = hasVerifiedEmail && hasYoutubeChannels && !isYoutubeTransferComplete;
+  const showFollowIntro = hasVerifiedEmail && !hasSeenFollowList;
   const showLoadingSpinner =
     canHijackSignInFlowWithSpinner && (isCurrentlyFetchingSomething || isWaitingForSomethingToFinish);
 
@@ -116,7 +118,7 @@ function UserSignIn(props: Props) {
     showEmailVerification && <UserEmailVerify />,
     showUserVerification && <UserVerify skipLink={redirect} />,
     showChannelCreation && <UserFirstChannel />,
-    true && <UserChannelFollowIntro />,
+    showFollowIntro && <UserChannelFollowIntro onContinue={() => setHasSeenFollowList(true)} />,
     showYoutubeTransfer && (
       <div>
         <YoutubeTransferStatus /> <Confetti recycle={false} style={{ position: 'fixed' }} />

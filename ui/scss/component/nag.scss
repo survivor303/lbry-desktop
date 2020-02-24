@@ -11,8 +11,8 @@
 }
 
 .nag--helpful {
-  background-color: var(--color-secondary-alt);
-  color: var(--color-primary);
+  background-color: var(--color-secondary);
+  color: var(--color-white);
 }
 
 .nag__button {
@@ -26,17 +26,17 @@
 
   &:hover {
     background-color: var(--color-white);
-    color: var(--color-nag);
+    color: var(--color-white);
   }
 }
 
 .nag__button--helpful {
-  color: var(--color-primary);
-  border-color: var(--color-primary);
+  // color: var(--color-primary);
+  // border-color: var(--color-primary);
 
   &:hover {
-    background-color: var(--color-primary);
-    color: var(--color-white);
+    background-color: var(--color-secondary-alt);
+    color: var(--color-secondary);
   }
 }
 
